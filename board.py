@@ -1,4 +1,5 @@
 import random
+import math
 
 EMPTY_VALUE = 0
 
@@ -17,7 +18,7 @@ class Board:
         """
         board = [x for x in range(1, self.dimension**2)]
         board.append(EMPTY_VALUE)
-        while self.in_order(board):
+        while self.in_order(board) or not self.is_solvable(board):
             random.shuffle(board)
         self.board = board
 
@@ -105,3 +106,42 @@ class Board:
         if index % self.dimension != 0:
             neighbour = self.board[left_neighbour_index]
         return neighbour
+
+    def is_solvable(self, board):
+        if not board:
+            board = self.board
+        inversions = self.inversions(board)
+        row_index = self._get_row_with_empty_value(board)
+
+        if (self.dimension % 2 != 0) and (inversions % 2 == 0):
+            return True
+        if self.dimension % 2 == 0:
+            if (row_index % 2 != 0) and (inversions % 2 != 0):
+                return True
+            if (row_index % 2 == 0) and (inversions % 2 == 0):
+                return True
+        return False
+
+    def inversions(self, board):
+        """
+        Count the number of inversions in the board i.e. the umber of tiles that precede a tile with a smaller value
+        :param board: 
+        :return: number of inversions 
+        """
+        if not board:
+            board = self.board
+        count = 0
+        for i in board:
+            for j in board[i+1:]:
+                if i == 0 or j == 0:
+                    continue
+                if i > j:
+                    count += 1
+        return count
+
+    def _get_row_with_empty_value(self, board):
+        if not board:
+            board = self.board
+        index = board.index(EMPTY_VALUE)
+        row_number = math.ceil(index/self.dimension)
+        return row_number
